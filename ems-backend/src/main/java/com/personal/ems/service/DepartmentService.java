@@ -12,10 +12,11 @@ public interface DepartmentService {
     public Long getTotalNumberOfDepartment();
     public List<DepartmentDto> getDepartmentWithPagination(int pageNumber);
     public DepartmentDto getDepartmentById(Long departmentId);
+    public List<DepartmentDto> getAllDepartment();
 
     //UPDATE
     DepartmentDto DepartmentUpdate(Long departmentId, DepartmentDto updatedDepartment);
 
     //DELETE
-    void deleteDepartment();
+    void deleteDepartment(Long departmentId);
 }

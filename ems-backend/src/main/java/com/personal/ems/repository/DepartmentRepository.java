@@ -8,11 +8,14 @@ import org.springframework.data.jpa.repository.Query;
 import com.personal.ems.model.Department;
 
 public interface DepartmentRepository extends JpaRepository<Department, Long> {
-    String SQL = "SELECT department_id, department_name, department_description, status from departments LIMIT ?1 OFFSET ?2";
+    String SQL = "SELECT department_id, department_name, department_description, status from departments WHERE status = true LIMIT ?1 OFFSET ?2";
     
     @Query(value = SQL, nativeQuery = true)
     public List<Department> getDepartmentWithPagination(int limit, int offset);
 
-    @Query(value = "SELECT COUNT(department_id) FROM departments", nativeQuery = true)
+    @Query(value = "SELECT department_id, department_name, department_description, status from departments WHERE status = true", nativeQuery = true)
+    public List<Department> getAllDepartment();
+
+    @Query(value = "SELECT COUNT(department_id) FROM departments WHERE status = true", nativeQuery = true)
     public Long getTotalDepartment();
 }

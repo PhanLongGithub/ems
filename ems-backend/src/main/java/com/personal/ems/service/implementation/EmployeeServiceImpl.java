@@ -7,7 +7,9 @@ import org.springframework.stereotype.Service;
 import com.personal.ems.dto.EmployeeDto;
 import com.personal.ems.exception.ResourceNotFoundException;
 import com.personal.ems.mapper.EmployeeMapper;
+import com.personal.ems.model.Department;
 import com.personal.ems.model.Employee;
+import com.personal.ems.repository.DepartmentRepository;
 import com.personal.ems.repository.EmployeeRepository;
 import com.personal.ems.service.EmployeeService;
 
@@ -18,10 +20,15 @@ import lombok.AllArgsConstructor;
 public class EmployeeServiceImpl implements EmployeeService{
 
     private EmployeeRepository employeeRepository;
+    private DepartmentRepository departmentRepository;
 
     @Override
     public EmployeeDto createEmployee(EmployeeDto employeeDto) {
         Employee employee = EmployeeMapper.mapToEmployee(employeeDto);
+        Department department = departmentRepository.findById(employeeDto.getDepartmentId()).orElseThrow(() -> {
+            return new ResourceNotFoundException("Can't find department with Id: " + employeeDto.getDepartmentId());
+        });
+        employee.setDepartment(department);
         Employee savedEmployee = employeeRepository.save(employee);
         return EmployeeMapper.maptoEmployeeDto(savedEmployee);
     }
@@ -49,9 +56,15 @@ public class EmployeeServiceImpl implements EmployeeService{
     public EmployeeDto updateEmployee(Long employeeId, EmployeeDto updatedEmployee) {
         Employee employee = employeeRepository.findById(employeeId).orElseThrow(
             () -> new ResourceNotFoundException("Employee is not exist with given id: " + employeeId));
+        Department department = departmentRepository.findById(updatedEmployee.getDepartmentId()).orElseThrow(() -> {
+            return new ResourceNotFoundException("Can't find department with Id: " + updatedEmployee.getDepartmentId());
+        });
+        
         employee.setFirstName(updatedEmployee.getFirstName());
         employee.setLastName(updatedEmployee.getLastName());
         employee.setEmail(updatedEmployee.getEmail());
+        employee.setDepartment(department);
+
         Employee successUpdatedEmployee = employeeRepository.save(employee);
         return EmployeeMapper.maptoEmployeeDto(successUpdatedEmployee);
     }

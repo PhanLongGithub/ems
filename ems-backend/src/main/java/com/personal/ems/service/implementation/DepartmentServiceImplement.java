@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.personal.ems.dto.DepartmentDto;
+import com.personal.ems.exception.ResourceNotFoundException;
 import com.personal.ems.mapper.DepartmentMapper;
 import com.personal.ems.model.Department;
 import com.personal.ems.repository.DepartmentRepository;
@@ -20,6 +21,7 @@ public class DepartmentServiceImplement implements DepartmentService {
 
     @Override
     public DepartmentDto createDepartment(DepartmentDto departmentDto) {
+        departmentDto.setStatus(true);
         Department department = DepartmentMapper.mapToDepartment(departmentDto);
         Department savedDepartment = departmentRepository.save(department);
         return DepartmentMapper.maptoDepartmentDto(savedDepartment);
@@ -33,24 +35,45 @@ public class DepartmentServiceImplement implements DepartmentService {
     @Override
     public List<DepartmentDto> getDepartmentWithPagination(int pageNumber) {
         List<Department> departments = departmentRepository.getDepartmentWithPagination(10, (pageNumber - 1) *10);
-        throw new UnsupportedOperationException("Unimplemented method 'getDepartmentById'");
+        List<DepartmentDto> departmentDtos = departments.stream().map(
+            (department) -> {return DepartmentMapper.maptoDepartmentDto(department); 
+            }).toList();
+        return departmentDtos; 
     }
 
     @Override
     public DepartmentDto getDepartmentById(Long departmentId) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getDepartmentById'");
+        Department department = departmentRepository.findById(departmentId).orElseThrow(() -> {
+            return new ResourceNotFoundException("Can't find department with Id: " + departmentId);
+        });
+        return DepartmentMapper.maptoDepartmentDto(department);
     }
 
     @Override
     public DepartmentDto DepartmentUpdate(Long departmentId, DepartmentDto updatedDepartment) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'DepartmentUpdate'");
+        Department department = departmentRepository.findById(departmentId).orElseThrow(() -> {
+            return new ResourceNotFoundException("Can't find department with Id: " + departmentId);
+        });
+        department.setDepartmentName(updatedDepartment.getDepartmentName());
+        department.setDepartmentDescription(updatedDepartment.getDepartmentDescription());
+        return DepartmentMapper.maptoDepartmentDto(departmentRepository.save(department));
     }
 
     @Override
-    public void deleteDepartment() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'deleteDepartment'");
+    public void deleteDepartment(Long departmentId) {
+        Department department = departmentRepository.findById(departmentId).orElseThrow(() -> {
+            return new ResourceNotFoundException("Can't find department with Id: " + departmentId);
+        });
+        department.setStatus(false);
+        departmentRepository.save(department);
+    }
+
+    @Override
+    public List<DepartmentDto> getAllDepartment() {
+        List<Department> departments = departmentRepository.getAllDepartment();
+        List<DepartmentDto> departmentDtos = departments.stream().map(
+            (department) -> {return DepartmentMapper.maptoDepartmentDto(department); 
+            }).toList();
+        return departmentDtos;
     }
 }
